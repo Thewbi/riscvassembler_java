@@ -60,7 +60,7 @@ public class App {
         //String inputFile = "src/test/resources/riscvasm/examples/riscvtest_orig.s";
         //String inputFile = "src/test/resources/riscvasm/examples/for_loop_2.s";
         //String inputFile = "src/test/resources/riscvasm/examples/square_with_driver.s";
-        String inputFile = "src/test/resources/riscvasm/examples/if.s";
+        //String inputFile = "src/test/resources/riscvasm/examples/if.s";
 
         //String inputFile = "src/test/resources/projects/snake/Main.asm";
 
@@ -68,6 +68,8 @@ public class App {
         //String inputFile = "src/test/resources/riscvasm/instructions/sw.s";
         //String inputFile = "src/test/resources/riscvasm/instructions/sw.s";
         //String inputFile = "src/test/resources/riscvasm/instructions/lw.s";
+
+        String inputFile = "src/test/resources/riscvasm/pipeline_hazards/forwarding.s";
 
         args[0] = inputFile;
         mainRISCV(args);
@@ -221,12 +223,16 @@ public class App {
 
     private static void emulate(byte[] machineCode) {
 
-        //SingleCycleCPU cpu = new SingleCycleCPU();
-        PipelinedCPU cpu = new PipelinedCPU();
+        SingleCycleCPU cpu = new SingleCycleCPU();
+        // PipelinedCPU cpu = new PipelinedCPU();
 
         cpu.pc = 0;
-        cpu.registerFile[RISCVRegister.REG_SP.getIndex()] = 100;
-        cpu.registerFile[RISCVRegister.REG_X8.getIndex()] = 100;
+
+        // initialize registers with data
+        //cpu.registerFile[RISCVRegister.REG_SP.getIndex()] = 100;
+        //cpu.registerFile[RISCVRegister.REG_X8.getIndex()] = 100;
+
+        // initialize memory with data
         cpu.memory = new byte[2048];
         // cpu.memory[80] = 1;
         // cpu.memory[81] = 2;

@@ -182,6 +182,10 @@ public class Decoder {
                         asmLine.mnemonic = Mnemonic.I_BNE;
                         break;
 
+                    case 0b100:
+                        asmLine.mnemonic = Mnemonic.I_BLT;
+                        break;
+
                     case 0b101:
                         asmLine.mnemonic = Mnemonic.I_BGE;
                         break;

@@ -69,7 +69,11 @@ public class App {
         //String inputFile = "src/test/resources/riscvasm/instructions/sw.s";
         //String inputFile = "src/test/resources/riscvasm/instructions/lw.s";
 
-        String inputFile = "src/test/resources/riscvasm/pipeline_hazards/forwarding.s";
+        //String inputFile = "src/test/resources/riscvasm/pipeline_hazards/forwarding.s";
+        //String inputFile = "src/test/resources/riscvasm/pipeline_hazards/pipeline_stall.s";
+        //String inputFile = "src/test/resources/riscvasm/examples/sw_test.s";
+
+        String inputFile = "src/test/resources/riscvasm/examples/scratchpad.s";
 
         args[0] = inputFile;
         mainRISCV(args);
@@ -266,7 +270,17 @@ public class App {
             cpu.step();
         }
 
+        System.out.println("");
+
+        // output registers ascending
         for (int i = 0; i < 32; i++) {
+            System.out.println("x" + (i) + ": " + cpu.registerFile[i]);
+        }
+
+        System.out.println("");
+
+        // output registers descending
+        for (int i = 31; i >= 0; i--) {
             System.out.println("x" + (i) + ": " + cpu.registerFile[i]);
         }
     }

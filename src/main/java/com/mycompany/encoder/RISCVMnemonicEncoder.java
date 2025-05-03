@@ -12,6 +12,8 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
     @SuppressWarnings("unused")
     private static final boolean USE_64_BIT = false;
 
+    public boolean verbose;
+
     public int encodeMnemonic(final ByteArrayOutputStream byteArrayOutStream,
             final AsmLine<?> asmLine, final Map<String, Long> labelAddressMap, final long currentAddress) {
 
@@ -125,10 +127,39 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
             case I_XOR:
                 return encodeXOR(byteArrayOutStream, asmLine);
 
+            case I_XORI:
+                return encodeXORI(byteArrayOutStream, asmLine);
+
             case I_UNKNOWN:
             default:
                 throw new RuntimeException("Unknown mnemonic: " + asmLine);
         }
+    }
+
+    /**
+     * https://riscv-software-src.github.io/riscv-unified-db/manual/html/isa/isa_20240411/insts/xori.html
+     * 
+     * @param byteArrayOutStream
+     * @param asmLine
+     * @return
+     */
+    private int encodeXORI(ByteArrayOutputStream byteArrayOutStream, AsmLine<?> asmLine) {
+
+        byte funct7 = 0b0000000;
+        byte funct3 = 0b100;
+        byte opcode = 0b0010011;
+
+        byte rd = (byte) asmLine.register_0.getIndex();
+        byte rs1 = (byte) asmLine.register_1.getIndex();
+        short imm = (short) asmLine.numeric_2.shortValue();
+
+        int result = encodeIType(imm, rs1, funct3, rd, opcode);
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
+        EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
+
+        return 4;
     }
 
     private int encodeXOR(ByteArrayOutputStream byteArrayOutStream, AsmLine<?> asmLine) {
@@ -142,7 +173,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         byte rs2 = (byte) asmLine.register_2.getIndex();
 
         int result = encodeRType(funct7, rs2, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -158,7 +191,8 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
             final String label = asmLine.offsetLabel_1;
 
             if (!labelAddressMap.containsKey(label)) {
-                throw new RuntimeException("Trying to lookup label \"" + label + "\" in labelAddressMap but it is not defined!");
+                throw new RuntimeException(
+                        "Trying to lookup label \"" + label + "\" in labelAddressMap but it is not defined!");
             }
 
             long value = labelAddressMap.get(label);
@@ -184,7 +218,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
 
             int result = encodeUType(imm, rd, opcode);
 
-            System.out.println(asmLine + " -> " + result);
+            if (verbose) {
+                System.out.println(asmLine + " -> " + result);
+            }
             EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         } else {
@@ -195,7 +231,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
             int imm = asmLine.numeric_1.shortValue();
 
             int result = encodeUType(imm, rd, opcode);
-            System.out.println(asmLine + " -> " + String.format("%08X", result));
+            if (verbose) {
+                System.out.println(asmLine + " -> " + String.format("%08X", result));
+            }
             EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         }
@@ -214,7 +252,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         byte rs2 = (byte) asmLine.register_2.getIndex();
 
         int result = encodeRType(funct7, rs2, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -267,7 +307,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
 
             int result = encodeIType(imm, rs1, funct3, rd, opcode);
 
-            System.out.println(asmLine + " -> " + result);
+            if (verbose) {
+                System.out.println(asmLine + " -> " + result);
+            }
             EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         } else {
@@ -279,7 +321,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
             short imm = asmLine.numeric_2.shortValue();
 
             int result = encodeIType(imm, rs1, funct3, rd, opcode);
-            System.out.println(asmLine + " -> " + String.format("%08X", result));
+            if (verbose) {
+                System.out.println(asmLine + " -> " + String.format("%08X", result));
+            }
             EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         }
@@ -298,7 +342,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.numeric_2.shortValue();
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -314,7 +360,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         byte rd = (byte) asmLine.register_0.getIndex();
 
         int result = encodeRType(funct7, rs2, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -329,7 +377,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.numeric_2.shortValue();
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -345,7 +395,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         byte rd = (byte) asmLine.register_0.getIndex();
 
         int result = encodeRType(funct7, rs2, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -361,7 +413,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         byte rd = (byte) asmLine.register_0.getIndex();
 
         int result = encodeRType(funct7, rs2, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -380,7 +434,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         }
 
         int result = encodeBType(imm, rs2, rs1, funct3, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -395,7 +451,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = 0x00;
 
         int result = encodeIType(imm, rs2, rs1, funct3, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -410,7 +468,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.numeric_2.shortValue();
 
         int result = encodeBType(imm, rs2, rs1, funct3, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -425,7 +485,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.numeric_2.shortValue();
 
         int result = encodeBType(imm, rs2, rs1, funct3, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -440,7 +502,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.numeric_2.shortValue();
 
         int result = encodeBType(imm, rs2, rs1, funct3, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -461,7 +525,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         int imm = asmLine.numeric_1.intValue();
 
         int result = encodeJType(imm, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -482,7 +548,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         }
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -494,7 +562,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         int imm = asmLine.numeric_1.shortValue();
 
         int result = encodeUType(imm, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -509,7 +579,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.offset_1.shortValue();
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -524,7 +596,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.offset_1.shortValue();
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -538,7 +612,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.offset_1.shortValue();
 
         int result = encodeSType(imm, rs2, rs1, funct3, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -553,7 +629,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.offset_1.shortValue();
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -569,7 +647,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         byte rd = (byte) asmLine.register_0.getIndex();
 
         int result = encodeRType(funct7, rs2, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -592,7 +672,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.offset_1.shortValue();
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -607,7 +689,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = (short) (((short) 0b010000000000) + ((short) asmLine.numeric_2.shortValue()));
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -622,7 +706,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = (short) (((short) 0b000000000000) + ((short) asmLine.numeric_2.shortValue()));
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -637,7 +723,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.numeric_2.shortValue();
 
         int result = encodeIType(imm, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -653,7 +741,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         byte rd = (byte) asmLine.register_0.getIndex();
 
         int result = encodeRType(funct7, rs2, rs1, funct3, rd, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -668,7 +758,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.offset_1.shortValue();
 
         int result = encodeSType(imm, rs2, rs1, funct3, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;
@@ -682,7 +774,9 @@ public class RISCVMnemonicEncoder implements MnemonicEncoder {
         short imm = asmLine.offset_1.shortValue();
 
         int result = encodeSType(imm, rs2, rs1, funct3, opcode);
-        System.out.println(asmLine + " -> " + String.format("%08X", result));
+        if (verbose) {
+            System.out.println(asmLine + " -> " + String.format("%08X", result));
+        }
         EncoderUtils.convertToUint32_t(byteArrayOutStream, result);
 
         return 4;

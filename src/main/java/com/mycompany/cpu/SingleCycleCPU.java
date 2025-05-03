@@ -15,6 +15,8 @@ public class SingleCycleCPU implements CPU {
 
     public int[] registerFile = new int[32];
 
+    public boolean verbose;
+
     public void step() {
 
         ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
@@ -23,7 +25,9 @@ public class SingleCycleCPU implements CPU {
         final int instruction = ByteArrayUtil.fourByteToInt(memory[pc + 0], memory[pc + 1], memory[pc + 2],
                 memory[pc + 3], byteOrder);
 
-        System.out.println("Loaded Instr: HEX: " + ByteArrayUtil.intToHex("%08x", instruction));
+        if (verbose) {
+            System.out.println("Loaded Instr: HEX: " + ByteArrayUtil.intToHex("%08x", instruction));
+        }
 
         AsmLine asmLine = Decoder.decode(instruction);
 
@@ -44,7 +48,9 @@ public class SingleCycleCPU implements CPU {
         switch (asmLine.mnemonic) {
 
             case I_LUI:
-                System.out.println("lui");
+                if (verbose) {
+                    System.out.println("lui");
+                }
                 // registerFile[asmLine.register_0.getIndex()] = asmLine.numeric_1.intValue();
                 writeRegister(asmLine.register_0.getIndex(), asmLine.numeric_1.intValue());
                 pc += 4;
@@ -54,16 +60,21 @@ public class SingleCycleCPU implements CPU {
                 // Add upper immediate to PC (and store the result into rd)
                 // auipc rd, imm
                 // rd <- PC + imm20 << 12; pc += 4;
-                System.out.println("auipc");
-                // registerFile[asmLine.register_0.getIndex()] = (int) (pc + (asmLine.numeric_1 << 12L));
+                if (verbose) {
+                    System.out.println("auipc");
+                }
+                // registerFile[asmLine.register_0.getIndex()] = (int) (pc + (asmLine.numeric_1
+                // << 12L));
                 writeRegister(asmLine.register_0.getIndex(), (int) (pc + (asmLine.numeric_1 << 12L)));
                 pc += 4;
                 break;
 
             case I_JAL:
-                // 
+                //
                 // rd = pc+4; pc += imm
-                System.out.println("jal");
+                if (verbose) {
+                    System.out.println("jal");
+                }
                 // registerFile[asmLine.register_0.getIndex()] = pc + 4;
                 writeRegister(asmLine.register_0.getIndex(), pc + 4);
                 pc += (int) NumberParseUtil.sign_extend_20_bit_to_int32_t(asmLine.numeric_1.intValue());
@@ -71,14 +82,18 @@ public class SingleCycleCPU implements CPU {
 
             case I_JALR:
                 // rd = pc+4; pc = rs1+imm
-                System.out.println("jalr");
+                if (verbose) {
+                    System.out.println("jalr");
+                }
                 // registerFile[asmLine.register_0.getIndex()] = pc + 4;
                 writeRegister(asmLine.register_0.getIndex(), pc + 4);
 
                 int pcReplacement = registerFile[asmLine.register_1.getIndex()] + asmLine.numeric_2.intValue();
 
-                System.out.println("Current PC: " + pc);
-                System.out.println("New PC: " + pcReplacement);
+                if (verbose) {
+                    System.out.println("Current PC: " + pc);
+                    System.out.println("New PC: " + pcReplacement);
+                }
 
                 pc = pcReplacement;
                 break;
@@ -86,7 +101,9 @@ public class SingleCycleCPU implements CPU {
             case I_BEQ:
                 // Take the branch if registers rs1 and rs2 are equal.
                 // if (x[rs1] == x[rs2]) pc += sext(offset)
-                System.out.println("beq");
+                if (verbose) {
+                    System.out.println("beq");
+                }
                 if (registerFile[asmLine.register_0.getIndex()] == registerFile[asmLine.register_1.getIndex()]) {
                     pc += asmLine.numeric_2.intValue();
                 } else {
@@ -95,7 +112,9 @@ public class SingleCycleCPU implements CPU {
                 break;
 
             case I_BNE:
-                System.out.println("bne");
+                if (verbose) {
+                    System.out.println("bne");
+                }
                 if (registerFile[asmLine.register_0.getIndex()] != registerFile[asmLine.register_1.getIndex()]) {
                     pc += asmLine.numeric_2.intValue();
                 } else {
@@ -104,7 +123,10 @@ public class SingleCycleCPU implements CPU {
                 break;
 
             case I_BLT:
-                System.out.println("blt -- rs1: " + registerFile[asmLine.register_0.getIndex()] + " rs2: " + registerFile[asmLine.register_1.getIndex()]);
+                if (verbose) {
+                    System.out.println("blt -- rs1: " + registerFile[asmLine.register_0.getIndex()] + " rs2: "
+                            + registerFile[asmLine.register_1.getIndex()]);
+                }
                 if (registerFile[asmLine.register_0.getIndex()] < registerFile[asmLine.register_1.getIndex()]) {
                     pc += asmLine.numeric_2.intValue();
                 } else {
@@ -114,7 +136,9 @@ public class SingleCycleCPU implements CPU {
 
             case I_BGE:
                 // if(rs1 >= rs2) pc += imm
-                System.out.println("bge");
+                if (verbose) {
+                    System.out.println("bge");
+                }
                 if (registerFile[asmLine.register_0.getIndex()] >= registerFile[asmLine.register_1.getIndex()]) {
                     pc += asmLine.numeric_2.intValue();
                 } else {
@@ -139,26 +163,33 @@ public class SingleCycleCPU implements CPU {
                 break;
 
             case I_LW:
-                System.out.println(asmLine);
+                if (verbose) {
+                    System.out.println(asmLine);
+                }
 
                 // compute memory address to load from (EXECUTE STAGE)
                 addr = (int) (asmLine.offset_1 + registerFile[asmLine.register_1.getIndex()]);
-                System.out.println("addr: " + addr);
+                if (verbose) {
+                    System.out.println("addr: " + addr);
+                }
 
                 // read from memory (MEMORY STAGE)
 
-                //let = ByteArrayUtil.intToFourByte(value, ByteOrder.BIG_ENDIAN);
+                // let = ByteArrayUtil.intToFourByte(value, ByteOrder.BIG_ENDIAN);
 
                 let = new byte[4];
 
                 let[0] = memory[addr + 0];
-                System.out.println("mem: " + (let[0]) + " = " + memory[addr + 0]);
                 let[1] = memory[addr + 1];
-                System.out.println("mem: " + (let[1]) + " = " + memory[addr + 1]);
                 let[2] = memory[addr + 2];
-                System.out.println("mem: " + (let[2]) + " = " + memory[addr + 2]);
                 let[3] = memory[addr + 3];
-                System.out.println("mem: " + (let[3]) + " = " + memory[addr + 3]);
+
+                if (verbose) {
+                    System.out.println("mem: " + (let[0]) + " = " + memory[addr + 0]);
+                    System.out.println("mem: " + (let[1]) + " = " + memory[addr + 1]);
+                    System.out.println("mem: " + (let[2]) + " = " + memory[addr + 2]);
+                    System.out.println("mem: " + (let[3]) + " = " + memory[addr + 3]);
+                }
 
                 // WRITE BACK STAGE
 
@@ -190,11 +221,13 @@ public class SingleCycleCPU implements CPU {
                 break;
 
             case I_SW:
-                System.out.println("sw : " + asmLine);
+                if (verbose) {
+                    System.out.println("sw : " + asmLine);
+                }
                 // Store 32-bit, values from the low bits of register rs2 to memory.
                 // sw rs2, offset(rs1)
                 // M[x[rs1] + sext(offset)] = x[rs2][31:0]
-                //throw new RuntimeException("Not implemented yet!");
+                // throw new RuntimeException("Not implemented yet!");
 
                 // compute memory address to store to (EXECUTE STAGE)
                 addr = (int) (asmLine.offset_1 + registerFile[asmLine.register_1.getIndex()]);
@@ -203,13 +236,16 @@ public class SingleCycleCPU implements CPU {
                 value = registerFile[asmLine.register_0.getIndex()];
                 let = ByteArrayUtil.intToFourByte(value, ByteOrder.BIG_ENDIAN);
                 memory[addr + 0] = let[0];
-                System.out.println("mem: " + (addr + 0) + " = " + let[0]);
                 memory[addr + 1] = let[1];
-                System.out.println("mem: " + (addr + 1) + " = " + let[1]);
                 memory[addr + 2] = let[2];
-                System.out.println("mem: " + (addr + 2) + " = " + let[2]);
                 memory[addr + 3] = let[3];
-                System.out.println("mem: " + (addr + 3) + " = " + let[3]);
+
+                if (verbose) {
+                    System.out.println("mem: " + (addr + 0) + " = " + let[0]);
+                    System.out.println("mem: " + (addr + 1) + " = " + let[1]);
+                    System.out.println("mem: " + (addr + 2) + " = " + let[2]);
+                    System.out.println("mem: " + (addr + 3) + " = " + let[3]);
+                }
 
                 pc += 4;
                 break;
@@ -218,9 +254,13 @@ public class SingleCycleCPU implements CPU {
             // break;
             case I_ADDI:
                 // rd = rs1 + imm
-                System.out.println("addi: " + asmLine);
-                // registerFile[asmLine.register_0.getIndex()] = registerFile[asmLine.register_1.getIndex()] + asmLine.numeric_2.intValue();
-                writeRegister(asmLine.register_0.getIndex(), registerFile[asmLine.register_1.getIndex()] + asmLine.numeric_2.intValue());
+                if (verbose) {
+                    System.out.println("addi: " + asmLine);
+                }
+                // registerFile[asmLine.register_0.getIndex()] =
+                // registerFile[asmLine.register_1.getIndex()] + asmLine.numeric_2.intValue();
+                writeRegister(asmLine.register_0.getIndex(),
+                        registerFile[asmLine.register_1.getIndex()] + asmLine.numeric_2.intValue());
                 pc += 4;
                 break;
 
@@ -233,7 +273,16 @@ public class SingleCycleCPU implements CPU {
                 break;
 
             case I_XORI:
-                System.out.println("Unknown mnemonic! " + asmLine.mnemonic);
+                if (verbose) {
+                    System.out.println("xori: " + asmLine);
+                }
+
+                // System.out.println("xori: " + registerFile[asmLine.register_0.getIndex()]);
+                writeRegister(asmLine.register_0.getIndex(),
+                        registerFile[asmLine.register_1.getIndex()] ^ asmLine.numeric_2.intValue());
+                // System.out.println("xori: " + registerFile[asmLine.register_0.getIndex()]);
+
+                pc += 4;
                 break;
 
             case I_ORI:
@@ -257,9 +306,14 @@ public class SingleCycleCPU implements CPU {
                 break;
 
             case I_ADD:
-                System.out.println("add");
-                // registerFile[asmLine.register_0.getIndex()] = registerFile[asmLine.register_1.getIndex()] + registerFile[asmLine.register_2.getIndex()];
-                writeRegister(asmLine.register_0.getIndex(), registerFile[asmLine.register_1.getIndex()] + registerFile[asmLine.register_2.getIndex()]);
+                if (verbose) {
+                    System.out.println("add");
+                }
+                // registerFile[asmLine.register_0.getIndex()] =
+                // registerFile[asmLine.register_1.getIndex()] +
+                // registerFile[asmLine.register_2.getIndex()];
+                writeRegister(asmLine.register_0.getIndex(),
+                        registerFile[asmLine.register_1.getIndex()] + registerFile[asmLine.register_2.getIndex()]);
                 pc += 4;
                 break;
 
@@ -269,9 +323,14 @@ public class SingleCycleCPU implements CPU {
                 // simply the low XLEN bits of the result.
                 // sub rd,rs1,rs2
                 // x[rd] = x[rs1] - x[rs2]
-                System.out.println("sub");
-                // registerFile[asmLine.register_0.getIndex()] = registerFile[asmLine.register_1.getIndex()] - registerFile[asmLine.register_2.getIndex()];
-                writeRegister(asmLine.register_0.getIndex(), registerFile[asmLine.register_1.getIndex()] - registerFile[asmLine.register_2.getIndex()]);
+                if (verbose) {
+                    System.out.println("sub");
+                }
+                // registerFile[asmLine.register_0.getIndex()] =
+                // registerFile[asmLine.register_1.getIndex()] -
+                // registerFile[asmLine.register_2.getIndex()];
+                writeRegister(asmLine.register_0.getIndex(),
+                        registerFile[asmLine.register_1.getIndex()] - registerFile[asmLine.register_2.getIndex()]);
                 pc += 4;
                 break;
 
@@ -310,18 +369,28 @@ public class SingleCycleCPU implements CPU {
                 break;
 
             case I_OR:
-                System.out.println("or");
+                if (verbose) {
+                    System.out.println("or");
+                }
                 // Performs bitwise OR on registers rs1 and rs2 and place the result in rd
-                // registerFile[asmLine.register_0.getIndex()] = registerFile[asmLine.register_1.getIndex()] | registerFile[asmLine.register_2.getIndex()];
-                writeRegister(asmLine.register_0.getIndex(), registerFile[asmLine.register_1.getIndex()] | registerFile[asmLine.register_2.getIndex()]);
+                // registerFile[asmLine.register_0.getIndex()] =
+                // registerFile[asmLine.register_1.getIndex()] |
+                // registerFile[asmLine.register_2.getIndex()];
+                writeRegister(asmLine.register_0.getIndex(),
+                        registerFile[asmLine.register_1.getIndex()] | registerFile[asmLine.register_2.getIndex()]);
                 pc += 4;
                 break;
 
             case I_AND:
-                System.out.println("and");
+                if (verbose) {
+                    System.out.println("and");
+                }
                 // Performs bitwise AND on registers rs1 and rs2 and place the result in rd
-                // registerFile[asmLine.register_0.getIndex()] = registerFile[asmLine.register_1.getIndex()] & registerFile[asmLine.register_2.getIndex()];
-                writeRegister(asmLine.register_0.getIndex(), registerFile[asmLine.register_1.getIndex()] & registerFile[asmLine.register_2.getIndex()]);
+                // registerFile[asmLine.register_0.getIndex()] =
+                // registerFile[asmLine.register_1.getIndex()] &
+                // registerFile[asmLine.register_2.getIndex()];
+                writeRegister(asmLine.register_0.getIndex(),
+                        registerFile[asmLine.register_1.getIndex()] & registerFile[asmLine.register_2.getIndex()]);
                 pc += 4;
                 break;
 
@@ -353,9 +422,14 @@ public class SingleCycleCPU implements CPU {
             //
 
             case I_MUL:
-                System.out.println("mul");
-                // registerFile[asmLine.register_0.getIndex()] = registerFile[asmLine.register_1.getIndex()] * registerFile[asmLine.register_2.getIndex()];
-                writeRegister(asmLine.register_0.getIndex(), registerFile[asmLine.register_1.getIndex()] * registerFile[asmLine.register_2.getIndex()]);
+                if (verbose) {
+                    System.out.println("mul");
+                }
+                // registerFile[asmLine.register_0.getIndex()] =
+                // registerFile[asmLine.register_1.getIndex()] *
+                // registerFile[asmLine.register_2.getIndex()];
+                writeRegister(asmLine.register_0.getIndex(),
+                        registerFile[asmLine.register_1.getIndex()] * registerFile[asmLine.register_2.getIndex()]);
                 pc += 4;
                 break;
 

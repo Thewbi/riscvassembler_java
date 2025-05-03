@@ -62,6 +62,8 @@ public abstract class BaseAssembler {
 
     public abstract Encoder getEncoder();
 
+    public boolean verbose;
+
     public byte[] assemble(Map<String, Section> sectionMap, String asmInputFile) throws IOException {
 
         //
@@ -173,7 +175,9 @@ public abstract class BaseAssembler {
 
         for (AsmLine<?> asmLine : asmLines) {
 
-            System.out.println(asmLine);
+            if (verbose) {
+                System.out.println(asmLine);
+            }
 
             if (asmLine.asmInstruction == AsmInstruction.EQU) {
                 continue;

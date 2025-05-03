@@ -58,6 +58,10 @@ public class LiCombiner implements AsmInstructionListModifier {
                 continue;
             }
 
+            if ((data_1.offsetLabel_1 == null) || (data_2.offsetLabel_2 == null)) {
+                continue;
+            }
+
             if ((data_1.mnemonic == Mnemonic.I_LUI) && (data_2.mnemonic == Mnemonic.I_ADDI)) {
 
                 // offset label must match

@@ -1,10 +1,13 @@
-	lui x5, 15
-	lui x6, 6
-
-module_label:
-	blt x5, x6, modulo_end
-	sub x5, x5, x6
-	mv x7, x5
-	j module_label
-	
-modulo_end:
+lui s2, 0
+lui s3, 3
+lui s4, 4
+lui s5, 5
+lui s7, 0
+lui s8, 0
+lui s9, 0
+lui t2, 2
+lui t6, 6
+add s8, s4, s5
+sub s2, s8, s3
+or s9, t6, s8
+and s7, s8, t2

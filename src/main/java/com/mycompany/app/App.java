@@ -73,7 +73,9 @@ public class App {
         //String inputFile = "src/test/resources/riscvasm/pipeline_hazards/pipeline_stall.s";
         //String inputFile = "src/test/resources/riscvasm/examples/sw_test.s";
 
-        String inputFile = "src/test/resources/riscvasm/examples/scratchpad.s";
+        //String inputFile = "src/test/resources/riscvasm/examples/scratchpad.s";
+        // String inputFile = "src/test/resources/riscvasm/examples/blinky_memory_mapped_LED.s";
+        String inputFile = "src/test/resources/riscvasm/examples/beq_test.s";
 
         args[0] = inputFile;
         mainRISCV(args);
@@ -264,7 +266,8 @@ public class App {
         // pipelined processor
         //
 
-        int lastCycle = 16;
+        // int lastCycle = 16;
+        int lastCycle = 100;
 
         for (int i = 0; i < lastCycle; i++) {
             cpu.step();

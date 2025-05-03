@@ -21,17 +21,16 @@ public class Decoder {
     private static final int U_TYPE_2 = 0b0110111;
 
     private static final int J_TYPE = 0b1101111;
-
     
-
-
-
+    public static boolean verbose;
 
     public static AsmLine decode(final int data) {
 
         AsmLine asmLine = new AsmLine();
 
-        System.out.println("Decoding: " + ByteArrayUtil.intToHex(data));
+        if (verbose) {
+            System.out.println("Decoding: " + ByteArrayUtil.intToHex(data));
+        }
 
         if (data == 0) {
             asmLine.mnemonic = Mnemonic.I_NOP;
@@ -133,6 +132,10 @@ public class Decoder {
                 switch (funct3) {
                     case 0b000:
                         asmLine.mnemonic = Mnemonic.I_ADDI;
+                        break;
+
+                    case 0b100:
+                        asmLine.mnemonic = Mnemonic.I_XORI;
                         break;
 
                     default:

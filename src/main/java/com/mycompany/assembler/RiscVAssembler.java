@@ -65,11 +65,6 @@ public class RiscVAssembler extends BaseAssembler {
         return parser.asm_file();
     }
 
-    // @Override
-    // public List<AsmLine<?>> getAsmLines() {
-    //     return asmLines;
-    // }
-
     @Override
     public Encoder getEncoder() {
         return encoder;

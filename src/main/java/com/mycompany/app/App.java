@@ -61,6 +61,7 @@ public class App {
         //String inputFile = "src/test/resources/riscvasm/examples/for_loop_2.s";
         //String inputFile = "src/test/resources/riscvasm/examples/square_with_driver.s";
         //String inputFile = "src/test/resources/riscvasm/examples/if.s";
+        String inputFile = "src/test/resources/riscvasm/examples/riscvtest.s";
 
         //String inputFile = "src/test/resources/projects/snake/Main.asm";
 
@@ -68,14 +69,6 @@ public class App {
         //String inputFile = "src/test/resources/riscvasm/instructions/sw.s";
         //String inputFile = "src/test/resources/riscvasm/instructions/sw.s";
         //String inputFile = "src/test/resources/riscvasm/instructions/lw.s";
-
-        //String inputFile = "src/test/resources/riscvasm/pipeline_hazards/forwarding.s";
-        //String inputFile = "src/test/resources/riscvasm/pipeline_hazards/pipeline_stall.s";
-        //String inputFile = "src/test/resources/riscvasm/examples/sw_test.s";
-
-        //String inputFile = "src/test/resources/riscvasm/examples/scratchpad.s";
-        // String inputFile = "src/test/resources/riscvasm/examples/blinky_memory_mapped_LED.s";
-        String inputFile = "src/test/resources/riscvasm/examples/beq_test.s";
 
         args[0] = inputFile;
         mainRISCV(args);
@@ -229,16 +222,12 @@ public class App {
 
     private static void emulate(byte[] machineCode) {
 
-        SingleCycleCPU cpu = new SingleCycleCPU();
-        // PipelinedCPU cpu = new PipelinedCPU();
+        //SingleCycleCPU cpu = new SingleCycleCPU();
+        PipelinedCPU cpu = new PipelinedCPU();
 
         cpu.pc = 0;
-
-        // initialize registers with data
-        //cpu.registerFile[RISCVRegister.REG_SP.getIndex()] = 100;
-        //cpu.registerFile[RISCVRegister.REG_X8.getIndex()] = 100;
-
-        // initialize memory with data
+        cpu.registerFile[RISCVRegister.REG_SP.getIndex()] = 100;
+        cpu.registerFile[RISCVRegister.REG_X8.getIndex()] = 100;
         cpu.memory = new byte[2048];
         // cpu.memory[80] = 1;
         // cpu.memory[81] = 2;
@@ -266,24 +255,13 @@ public class App {
         // pipelined processor
         //
 
-        // int lastCycle = 16;
-        int lastCycle = 100;
+        int lastCycle = 16;
 
         for (int i = 0; i < lastCycle; i++) {
             cpu.step();
         }
 
-        System.out.println("");
-
-        // output registers ascending
         for (int i = 0; i < 32; i++) {
-            System.out.println("x" + (i) + ": " + cpu.registerFile[i]);
-        }
-
-        System.out.println("");
-
-        // output registers descending
-        for (int i = 31; i >= 0; i--) {
             System.out.println("x" + (i) + ": " + cpu.registerFile[i]);
         }
     }

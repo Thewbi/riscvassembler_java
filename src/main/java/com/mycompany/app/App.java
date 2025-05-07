@@ -61,7 +61,8 @@ public class App {
         //String inputFile = "src/test/resources/riscvasm/examples/for_loop_2.s";
         //String inputFile = "src/test/resources/riscvasm/examples/square_with_driver.s";
         //String inputFile = "src/test/resources/riscvasm/examples/if.s";
-        String inputFile = "src/test/resources/riscvasm/examples/riscvtest.s";
+        // String inputFile = "src/test/resources/riscvasm/examples/riscvtest.s";
+        String inputFile = "src/test/resources/riscvasm/examples/function_call_c_abi.s";
 
         //String inputFile = "src/test/resources/projects/snake/Main.asm";
 
